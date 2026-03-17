@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hisn — Your Spiritual Fortress</title>
+  <meta name="description" content="Hisn transforms your screen time into moments of spiritual connection. Quran, Adhkar, Prayer Times, and Qibla — all in one beautiful app." />
+  <meta property="og:title" content="Hisn — Your Spiritual Fortress" />
+  <meta property="og:description" content="Transform screen time into spiritual remembrance." />
+  <meta property="og:image" content="assets/app_icon.png" />
+  <link rel="icon" type="image/png" href="assets/app_icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-deep:    #070d1f;
+      --bg-dark:    #0A1128;
+      --bg-card:    #0f1a36;
+      --bg-card2:   #111e3a;
+      --green:      #0D7C66;
+      --green-light:#13a688;
+      --green-glow: rgba(13,124,102,0.35);
+      --gold:       #D4AF37;
+      --gold-light: #e8c84a;
+      --gold-glow:  rgba(212,175,55,0.25);
+      --teal:       #41B3A3;
+      --teal-light: #5ecec0;
+      --text:       #FFFFFF;
+      --text-soft:  #B8C5D6;
+      --text-muted: #6b7fa3;
+      --radius:     16px;
+      --radius-sm:  10px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg-deep);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── Noise texture overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0; opacity: 0.5;
+    }
+
+    /* ── Ambient glow blobs ── */
+    .blob {
+      position: fixed; border-radius: 50%;
+      filter: blur(120px); pointer-events: none; z-index: 0;
+    }
+    .blob-1 { width: 600px; height: 600px; background: var(--green-glow); top: -200px; left: -200px; }
+    .blob-2 { width: 500px; height: 500px; background: var(--gold-glow);  bottom: 0;    right: -150px; }
+    .blob-3 { width: 350px; height: 350px; background: rgba(65,179,163,.15); top: 40%;  left: 50%; transform: translateX(-50%); }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 5%;
+      background: rgba(7,13,31,.75);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 12px; text-decoration: none;
+    }
+    .nav-logo img { width: 38px; height: 38px; border-radius: 10px; }
+    .nav-logo span {
+      font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--gold), var(--teal));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; align-items: center; gap: 32px; }
+    .nav-links a {
+      color: var(--text-soft); text-decoration: none; font-size: .9rem; font-weight: 500;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .btn-nav {
+      background: var(--green); color: #fff; padding: 10px 22px;
+      border-radius: 50px; font-size: .9rem; font-weight: 600;
+      text-decoration: none; transition: background .2s, transform .2s;
+    }
+    .btn-nav:hover { background: var(--green-light); transform: translateY(-1px); }
+
+    /* ── Sections ── */
+    section { position: relative; z-index: 1; }
+
+    /* ── Hero ── */
+    #hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px 5% 80px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(212,175,55,.12);
+      border: 1px solid rgba(212,175,55,.3);
+      color: var(--gold); padding: 7px 16px; border-radius: 50px;
+      font-size: .82rem; font-weight: 600; letter-spacing: .04em;
+      text-transform: uppercase; margin-bottom: 28px;
+      animation: fadeDown .7s ease both;
+    }
+    .hero-badge span { font-size: 1rem; }
+    .hero-title {
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 900; letter-spacing: -0.03em; line-height: 1.08;
+      margin-bottom: 12px;
+      animation: fadeDown .7s .1s ease both;
+    }
+    .hero-title .green  { color: var(--green-light); }
+    .hero-title .gold   { color: var(--gold); }
+    .hero-arabic {
+      font-family: 'Amiri', serif; font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+      color: var(--gold); direction: rtl; margin-bottom: 28px;
+      animation: fadeDown .7s .15s ease both;
+    }
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.22rem); color: var(--text-soft);
+      max-width: 600px; margin: 0 auto 44px;
+      animation: fadeDown .7s .2s ease both;
+    }
+    .hero-cta {
+      display: flex; align-items: center; justify-content: center; gap: 16px;
+      flex-wrap: wrap;
+      animation: fadeDown .7s .28s ease both;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      color: #fff; padding: 15px 32px; border-radius: 50px;
+      font-size: 1rem; font-weight: 700; text-decoration: none;
+      box-shadow: 0 8px 32px var(--green-glow);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px var(--green-glow); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.14);
+      color: var(--text); padding: 15px 32px; border-radius: 50px;
+      font-size: 1rem; font-weight: 600; text-decoration: none;
+      transition: background .2s, transform .2s;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,.12); transform: translateY(-2px); }
+
+    .hero-screens {
+      margin-top: 70px; position: relative;
+      animation: fadeUp .9s .4s ease both;
+    }
+    .hero-screens .screen-row {
+      display: flex; align-items: flex-end; justify-content: center; gap: 24px;
+    }
+    .hero-screens img {
+      border-radius: 28px;
+      box-shadow: 0 32px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06);
+      transition: transform .4s;
+    }
+    .hero-screens img:hover { transform: translateY(-8px); }
+    .screen-center { width: 260px; height: auto; }
+    .screen-side   { width: 200px; height: auto; transform: translateY(30px) scale(.95); opacity: .8; }
+    .screen-far    { width: 160px; height: auto; transform: translateY(50px) scale(.9);  opacity: .55; }
+
+    /* ── Stats bar ── */
+    #stats {
+      padding: 56px 5%;
+      background: rgba(13,124,102,.08);
+      border-top: 1px solid rgba(13,124,102,.2);
+      border-bottom: 1px solid rgba(13,124,102,.2);
+    }
+    .stats-grid {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0; flex-wrap: wrap; max-width: 900px; margin: 0 auto;
+    }
+    .stat-item {
+      flex: 1; min-width: 160px; text-align: center; padding: 16px 24px;
+      border-right: 1px solid rgba(255,255,255,.08);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-number {
+      font-size: 2.4rem; font-weight: 900; letter-spacing: -0.03em;
+      background: linear-gradient(135deg, var(--gold), var(--teal));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-label { font-size: .85rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── Section titles ── */
+    .section-label {
+      display: inline-block;
+      font-size: .75rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--gold);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800; letter-spacing: -0.025em; line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .section-sub { color: var(--text-soft); font-size: 1.05rem; max-width: 560px; }
+    .centered { text-align: center; }
+    .centered .section-sub { margin: 0 auto; }
+
+    /* ── Key Feature — blocker ── */
+    #key-feature { padding: 100px 5%; }
+    .kf-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center;
+    }
+    .kf-text .section-label { margin-bottom: 14px; }
+    .kf-list { list-style: none; margin-top: 32px; display: flex; flex-direction: column; gap: 18px; }
+    .kf-list li {
+      display: flex; align-items: flex-start; gap: 14px;
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,.07);
+      border-radius: var(--radius); padding: 18px 20px;
+      transition: border-color .2s, transform .2s;
+    }
+    .kf-list li:hover { border-color: rgba(13,124,102,.4); transform: translateX(4px); }
+    .kf-icon {
+      width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+    }
+    .kf-list-text strong { display: block; font-weight: 600; margin-bottom: 3px; }
+    .kf-list-text span { color: var(--text-soft); font-size: .9rem; }
+    .kf-img { display: flex; justify-content: center; }
+    .kf-img img {
+      width: 300px; border-radius: 32px;
+      box-shadow: 0 40px 100px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.07);
+    }
+
+    /* ── Features grid ── */
+    #features { padding: 100px 5%; }
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px; max-width: 1100px; margin: 56px auto 0;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 20px; padding: 32px;
+      transition: border-color .25s, transform .25s, box-shadow .25s;
+      position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: ''; position: absolute; inset: 0; border-radius: 20px;
+      background: linear-gradient(135deg, rgba(13,124,102,.08), transparent);
+      opacity: 0; transition: opacity .25s;
+    }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-card:hover {
+      border-color: rgba(13,124,102,.35);
+      transform: translateY(-5px);
+      box-shadow: 0 24px 60px rgba(0,0,0,.3);
+    }
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 20px;
+    }
+    .icon-green  { background: linear-gradient(135deg, var(--green), var(--teal)); }
+    .icon-gold   { background: linear-gradient(135deg, #b8871f, var(--gold)); }
+    .icon-teal   { background: linear-gradient(135deg, var(--teal), #5ecece); }
+    .icon-purple { background: linear-gradient(135deg, #6b47c4, #9f7aea); }
+    .feature-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
+    .feature-card p  { color: var(--text-soft); font-size: .92rem; line-height: 1.65; }
+    .feature-tag {
+      display: inline-block; margin-top: 14px;
+      background: rgba(13,124,102,.18); color: var(--green-light);
+      border: 1px solid rgba(13,124,102,.3);
+      padding: 3px 10px; border-radius: 50px; font-size: .75rem; font-weight: 600;
+    }
+
+    /* ── Screenshots showcase ── */
+    #showcase { padding: 100px 5%; }
+    .showcase-inner { max-width: 1100px; margin: 0 auto; }
+    .tabs {
+      display: flex; gap: 12px; flex-wrap: wrap; margin: 40px 0 48px;
+      justify-content: center;
+    }
+    .tab-btn {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      color: var(--text-soft); padding: 10px 22px; border-radius: 50px;
+      font-size: .88rem; font-weight: 500; cursor: pointer;
+      transition: all .2s;
+    }
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--green); border-color: var(--green);
+      color: #fff;
+    }
+    .showcase-content { display: none; }
+    .showcase-content.active { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+    .showcase-img img {
+      width: 100%; border-radius: 28px;
+      box-shadow: 0 32px 80px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.07);
+    }
+    .showcase-text h3 {
+      font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 16px;
+    }
+    .showcase-text p { color: var(--text-soft); font-size: 1rem; line-height: 1.75; margin-bottom: 14px; }
+    .pill-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .pill {
+      background: rgba(65,179,163,.12); border: 1px solid rgba(65,179,163,.25);
+      color: var(--teal-light); padding: 6px 14px; border-radius: 50px; font-size: .82rem;
+    }
+
+    /* ── How it works ── */
+    #how { padding: 100px 5%; background: rgba(13,124,102,.04); }
+    .steps {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 32px; max-width: 1000px; margin: 60px auto 0;
+      position: relative;
+    }
+    .step {
+      text-align: center; padding: 32px 24px;
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 20px; position: relative;
+      transition: transform .25s, border-color .25s;
+    }
+    .step:hover { transform: translateY(-4px); border-color: rgba(212,175,55,.3); }
+    .step-num {
+      width: 52px; height: 52px; border-radius: 50%; margin: 0 auto 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--bg-deep); box-shadow: 0 8px 24px var(--gold-glow);
+    }
+    .step h4 { font-size: 1rem; font-weight: 700; margin-bottom: 10px; }
+    .step p  { color: var(--text-soft); font-size: .9rem; }
+
+    /* ── Testimonials / Quotes ── */
+    #feel { padding: 100px 5%; }
+    .feel-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px; max-width: 1000px; margin: 56px auto 0;
+    }
+    .feel-card {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 20px; padding: 28px;
+    }
+    .feel-quote {
+      font-size: 1.05rem; line-height: 1.7; color: var(--text-soft); margin-bottom: 20px;
+      font-style: italic;
+    }
+    .feel-quote .hl { color: var(--text); font-style: normal; font-weight: 600; }
+    .feel-meta { display: flex; align-items: center; gap: 12px; }
+    .feel-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+    }
+    .feel-name { font-weight: 600; font-size: .9rem; }
+    .feel-role { color: var(--text-muted); font-size: .8rem; }
+
+    /* ── CTA ── */
+    #cta {
+      padding: 120px 5%; text-align: center;
+      background: linear-gradient(160deg, rgba(13,124,102,.12) 0%, transparent 60%);
+    }
+    .cta-glow {
+      position: absolute; width: 600px; height: 400px; border-radius: 50%;
+      background: var(--green-glow); filter: blur(100px);
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .cta-title {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 20px;
+      position: relative; z-index: 1;
+    }
+    .cta-sub {
+      color: var(--text-soft); font-size: 1.1rem;
+      max-width: 500px; margin: 0 auto 44px;
+      position: relative; z-index: 1;
+    }
+    .store-buttons {
+      display: flex; align-items: center; justify-content: center; gap: 16px;
+      flex-wrap: wrap; position: relative; z-index: 1;
+    }
+    .store-btn {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+      color: var(--text); padding: 14px 28px; border-radius: 16px;
+      text-decoration: none; font-size: .95rem; font-weight: 600;
+      transition: background .2s, transform .2s;
+    }
+    .store-btn:hover { background: rgba(255,255,255,.15); transform: translateY(-2px); }
+    .store-icon { font-size: 1.8rem; }
+    .store-sub { font-size: .72rem; color: var(--text-soft); font-weight: 400; }
+
+    /* ── Footer ── */
+    footer {
+      padding: 48px 5% 32px;
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+    .footer-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+    }
+    .footer-brand {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .footer-brand img { width: 30px; border-radius: 8px; }
+    .footer-brand span { font-weight: 700; font-size: .95rem; }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; font-size: .85rem; transition: color .2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { color: var(--text-muted); font-size: .82rem; width: 100%; text-align: center; margin-top: 16px; }
+
+    /* ── Animations ── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .kf-inner { grid-template-columns: 1fr; }
+      .kf-img   { order: -1; }
+      .kf-img img { width: 240px; }
+      .showcase-content.active { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .screen-side, .screen-far { display: none; }
+      .screen-center { width: 220px; }
+    }
+    @media (max-width: 600px) {
+      .stat-item { min-width: 50%; border-right: none; border-bottom: 1px solid rgba(255,255,255,.08); }
+      .stat-item:nth-child(even) { border-right: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient background -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <!-- ── Navigation ── -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <img src="assets/app_icon.png" alt="Hisn" />
+      <span>حصن · Hisn</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#showcase">Screenshots</a>
+      <a href="#how">How It Works</a>
+      <a href="#cta" class="btn-nav">Download</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section id="hero">
+    <div class="hero-badge"><span>✨</span> Available on Android &amp; iOS</div>
+    <h1 class="hero-title">
+      Your <span class="green">Spiritual</span><br />
+      <span class="gold">Fortress</span>
+    </h1>
+    <p class="hero-arabic">حصنك الروحي</p>
+    <p class="hero-sub">
+      Turn every screen-unlock into a moment of remembrance. Quran, Adhkar, Prayer Times, and Qibla — beautifully united.
+    </p>
+    <div class="hero-cta">
+      <a href="#cta" class="btn-primary">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.39.07 2.34.74 3.15.8 1.2-.24 2.35-.93 3.64-.84 1.54.13 2.7.73 3.46 1.83-3.18 1.9-2.42 5.9.55 7.05-.62 1.4-1.38 2.78-2.8 4.04zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+        Download on iOS
+      </a>
+      <a href="#cta" class="btn-secondary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76a2.5 2.5 0 0 0 2.73-.27l.09-.07L14.08 17l-2.89-2.89-8.01 9.65zM20.07 9.8l-2.74-1.56-3.2 2.83 3.2 2.86 2.76-1.57a1.85 1.85 0 0 0 0-2.56zM3.18.24a1.86 1.86 0 0 0-1.18 1.75v20.02c0 .76.41 1.44 1.08 1.75l.1.05 11.22-11.22v-.26L3.18.24zM14.08 7l-2.89-2.89-8.01-3.87L14.08 7z"/></svg>
+        Get on Android
+      </a>
+    </div>
+
+    <div class="hero-screens">
+      <div class="screen-row">
+        <img src="assets/screenshots/slide6_final.png"  class="screen-far"    alt="" />
+        <img src="assets/screenshots/slide5_quran.png"  class="screen-side"   alt="" />
+        <img src="assets/screenshots/slide1_overlay.png" class="screen-center" alt="Hisn App" />
+        <img src="assets/screenshots/slide7_prayer_widget.png" class="screen-side" alt="" />
+        <img src="assets/screenshots/slide2_progress.png" class="screen-far"  alt="" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Stats ── -->
+  <section id="stats">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-number">114</div>
+        <div class="stat-label">Quran Surahs</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">6,236</div>
+        <div class="stat-label">Ayat Available</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">200+</div>
+        <div class="stat-label">Authentic Adhkar</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">5</div>
+        <div class="stat-label">Daily Prayer Alerts</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">2</div>
+        <div class="stat-label">Languages · لغتان</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Key Feature: Blocker ── -->
+  <section id="key-feature">
+    <div class="kf-inner">
+      <div class="kf-text reveal">
+        <span class="section-label">Signature Feature</span>
+        <h2 class="section-title">Turn Distractions into<br /><span style="color:var(--green-light)">Spiritual Moments</span></h2>
+        <p style="color:var(--text-soft);font-size:1rem;line-height:1.75;margin-top:12px">
+          Every time you open a distracting app — social media, games, anything you choose — Hisn gently appears with a verse from the Quran or an authentic remembrance. One mindful breath before you scroll.
+        </p>
+        <ul class="kf-list">
+          <li>
+            <div class="kf-icon">📱</div>
+            <div class="kf-list-text">
+              <strong>You Choose the Apps</strong>
+              <span>Pick which apps trigger reminders — full control, no presets forced on you.</span>
+            </div>
+          </li>
+          <li>
+            <div class="kf-icon">📖</div>
+            <div class="kf-list-text">
+              <strong>Quran &amp; Adhkar Overlays</strong>
+              <span>Alternates between Quranic verses and Hisn ul-Muslim supplications automatically.</span>
+            </div>
+          </li>
+          <li>
+            <div class="kf-icon">⚡</div>
+            <div class="kf-list-text">
+              <strong>One Tap to Continue</strong>
+              <span>Read, reflect, then go on with your day. It never locks you out.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="kf-img reveal">
+        <img src="assets/screenshots/slide1_overlay.png" alt="Hisn Overlay Feature" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ── All Features ── -->
+  <section id="features">
+    <div class="centered reveal">
+      <span class="section-label">Everything You Need</span>
+      <h2 class="section-title">A Complete Companion<br />for Every Muslim</h2>
+      <p class="section-sub">From the Fajr alarm to the last Adhkar before sleep — Hisn walks with you through every part of your day.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="feature-icon icon-green">📖</div>
+        <h3>Full Quran Reader</h3>
+        <p>Browse by Surah, Page, Juz, or Hizb. Beautiful Arabic typography with audio recitation (Tilawah) — read and listen, anywhere, offline.</p>
+        <span class="feature-tag">Offline · Audio</span>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon icon-gold">🤲</div>
+        <h3>Authentic Adhkar</h3>
+        <p>Morning, Evening, After Prayer, and Before Sleep remembrances from Hisn ul-Muslim — with Arabic text, transliteration, and count tracking.</p>
+        <span class="feature-tag">Hisn ul-Muslim</span>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon icon-teal">🕌</div>
+        <h3>Prayer Times</h3>
+        <p>Precise prayer times calculated from your GPS location. Adhan notifications with beautiful sounds, and a home-screen widget so you never miss a prayer.</p>
+        <span class="feature-tag">GPS · Widget · Adhan</span>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon icon-green">🧭</div>
+        <h3>Qibla Compass</h3>
+        <p>Real-time compass with a precise Kaaba direction indicator. Works with built-in calibration guidance for perfect accuracy anywhere in the world.</p>
+        <span class="feature-tag">Real-time · Calibrated</span>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon icon-purple">📊</div>
+        <h3>Spiritual Progress</h3>
+        <p>Track how often you connect with Quran and Adhkar. Visual stats help you see your consistency and celebrate streaks of remembrance.</p>
+        <span class="feature-tag">Streaks · Insights</span>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon icon-gold">📿</div>
+        <h3>Digital Sebha</h3>
+        <p>A smooth, haptic digital tasbeeh counter for your daily Dhikr. Count your Subhanallah, Alhamdulillah, and Allahu Akbar effortlessly.</p>
+        <span class="feature-tag">Haptic Feedback</span>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon icon-teal">🔖</div>
+        <h3>Bookmarks</h3>
+        <p>Save your favourite Ayat and jump back to them instantly. Your personal collection of verses that resonate with you most.</p>
+        <span class="feature-tag">Personal Library</span>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon icon-green">🌙</div>
+        <h3>Hijri Calendar</h3>
+        <p>Stay connected to the Islamic lunar calendar alongside the Gregorian date, so you never miss important Islamic dates and occasions.</p>
+        <span class="feature-tag">Dual Calendar</span>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon icon-gold">🔔</div>
+        <h3>Smart Notifications</h3>
+        <p>Scheduled content notifications with Quranic verses and Adhkar delivered throughout your day — gentle reminders, not noise.</p>
+        <span class="feature-tag">Scheduled · Gentle</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Screenshots Showcase ── -->
+  <section id="showcase">
+    <div class="showcase-inner">
+      <div class="centered reveal">
+        <span class="section-label">App Screens</span>
+        <h2 class="section-title">Crafted with Care,<br />Every Pixel</h2>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="overlay">App Blocker</button>
+        <button class="tab-btn" data-tab="quran">Quran</button>
+        <button class="tab-btn" data-tab="progress">Progress</button>
+        <button class="tab-btn" data-tab="apps">App Selection</button>
+        <button class="tab-btn" data-tab="widget">Prayer Widget</button>
+      </div>
+
+      <div class="showcase-content active" id="tab-overlay">
+        <div class="showcase-img">
+          <img src="assets/screenshots/slide1_overlay.png" alt="Overlay" />
+        </div>
+        <div class="showcase-text">
+          <h3>Mindful Interruptions</h3>
+          <p>When you open a distracting app, Hisn softly appears with a Quranic verse or Dhikr. A breath of the divine before the scroll.</p>
+          <p>You're never locked out — just gently reminded of what matters more.</p>
+          <div class="pill-list">
+            <span class="pill">Quran Verses</span>
+            <span class="pill">Authentic Adhkar</span>
+            <span class="pill">One-tap to continue</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="showcase-content" id="tab-quran">
+        <div class="showcase-img">
+          <img src="assets/screenshots/slide5_quran.png" alt="Quran" />
+        </div>
+        <div class="showcase-text">
+          <h3>Full Quran Experience</h3>
+          <p>All 114 Surahs with stunning Arabic typography. Navigate by Surah, Page, Juz, or Hizb. Listen to beautiful audio recitation while you read.</p>
+          <p>Your spiritual library, always at hand — even offline.</p>
+          <div class="pill-list">
+            <span class="pill">Surah · Juz · Hizb</span>
+            <span class="pill">Audio Recitation</span>
+            <span class="pill">Bookmarks</span>
+            <span class="pill">Offline</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="showcase-content" id="tab-progress">
+        <div class="showcase-img">
+          <img src="assets/screenshots/slide2_progress.png" alt="Progress" />
+        </div>
+        <div class="showcase-text">
+          <h3>Track Your Journey</h3>
+          <p>See how your spiritual habits grow over time. Visual stats on your Quran reading and Adhkar count help you stay motivated and consistent.</p>
+          <p>Small, steady steps — Hisn celebrates every one of them.</p>
+          <div class="pill-list">
+            <span class="pill">Daily Streaks</span>
+            <span class="pill">Reading Stats</span>
+            <span class="pill">Adhkar Count</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="showcase-content" id="tab-apps">
+        <div class="showcase-img">
+          <img src="assets/screenshots/slide3_apps.png" alt="App Selection" />
+        </div>
+        <div class="showcase-text">
+          <h3>You're in Full Control</h3>
+          <p>Choose exactly which apps on your phone trigger the spiritual reminder overlay. Social media, games, browsers — your choice, your rules.</p>
+          <p>Hisn respects your autonomy while helping you build better habits.</p>
+          <div class="pill-list">
+            <span class="pill">Custom App List</span>
+            <span class="pill">Easy Toggle</span>
+            <span class="pill">No Forced Restrictions</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="showcase-content" id="tab-widget">
+        <div class="showcase-img">
+          <img src="assets/screenshots/slide7_prayer_widget.png" alt="Prayer Widget" />
+        </div>
+        <div class="showcase-text">
+          <h3>Prayer Times on Your Home Screen</h3>
+          <p>A beautiful, glanceable widget showing today's prayer times — always visible, always accurate, based on your real location.</p>
+          <p>Never miss a prayer again, even without opening the app.</p>
+          <div class="pill-list">
+            <span class="pill">Home Screen Widget</span>
+            <span class="pill">GPS Accuracy</span>
+            <span class="pill">Android &amp; iOS</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── How it Works ── -->
+  <section id="how">
+    <div class="centered reveal">
+      <span class="section-label">Getting Started</span>
+      <h2 class="section-title">Up &amp; Running in Minutes</h2>
+      <p class="section-sub">Hisn is designed to be effortless. No complex setup, no overwhelming options — just a few steps to a more mindful day.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">1</div>
+        <h4>Download &amp; Open</h4>
+        <p>Install Hisn from the App Store or Google Play and open it for a friendly 5-step onboarding walkthrough.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">2</div>
+        <h4>Grant Permissions</h4>
+        <p>Allow location for prayer times and Qibla. Optionally enable app monitoring for the overlay feature — all explained clearly.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">3</div>
+        <h4>Pick Your Apps</h4>
+        <p>Select which apps you'd like to mindfully pause before opening. Hisn will gently appear with a reminder when you try to open them.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">4</div>
+        <h4>Live Mindfully</h4>
+        <p>Go about your day. Hisn quietly works in the background, weaving moments of remembrance into your screen time naturally.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Feel Section ── -->
+  <section id="feel">
+    <div class="centered reveal">
+      <span class="section-label">Why Hisn</span>
+      <h2 class="section-title">Designed to Feel<br /><span style="color:var(--gold)">Peaceful, Not Preachy</span></h2>
+    </div>
+
+    <div class="feel-grid">
+      <div class="feel-card reveal">
+        <p class="feel-quote">"Finally an app that <span class="hl">doesn't lecture me</span> — it just quietly plants a seed of remembrance every time I reach for my phone mindlessly."</p>
+        <div class="feel-meta">
+          <div class="feel-avatar">🌿</div>
+          <div>
+            <div class="feel-name">Fatima A.</div>
+            <div class="feel-role">Daily Quran reader</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="feel-card reveal">
+        <p class="feel-quote">"The prayer widget alone is worth it. I glance at my home screen and <span class="hl">I always know how long until the next Salah</span>. It changed how I plan my day."</p>
+        <div class="feel-meta">
+          <div class="feel-avatar">🕌</div>
+          <div>
+            <div class="feel-name">Omar K.</div>
+            <div class="feel-role">Five-prayers-a-day Muslim</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="feel-card reveal">
+        <p class="feel-quote">"I set it to interrupt Instagram. After a week I noticed <span class="hl">I was opening it less</span> — not because I was blocked, but because the Ayah made me think twice."</p>
+        <div class="feel-meta">
+          <div class="feel-avatar">📱</div>
+          <div>
+            <div class="feel-name">Yusuf M.</div>
+            <div class="feel-role">Trying to reduce screen time</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Download CTA ── -->
+  <section id="cta">
+    <div class="cta-glow"></div>
+    <div class="section-label">Download Now</div>
+    <h2 class="cta-title">
+      Start Your Journey<br />
+      <span style="color:var(--green-light)">One Ayah at a Time</span>
+    </h2>
+    <p class="cta-sub">
+      Free to download. No subscriptions. Just a sincere tool built for Muslims who want to do better — بإذن الله.
+    </p>
+    <div class="store-buttons">
+      <a href="#" class="store-btn">
+        <span class="store-icon">🍎</span>
+        <div>
+          <div class="store-sub">Download on the</div>
+          <div>App Store</div>
+        </div>
+      </a>
+      <a href="#" class="store-btn">
+        <span class="store-icon">▶</span>
+        <div>
+          <div class="store-sub">Get it on</div>
+          <div>Google Play</div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="assets/app_icon.png" alt="Hisn" />
+        <span>Hisn · حصن</span>
+      </div>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Contact</a>
+        <a href="https://github.com/a-3isa/hisn">GitHub</a>
+      </div>
+      <p class="footer-copy">
+        Made with ♥ for the Ummah &nbsp;·&nbsp; © 2025 Hisn
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // ── Tab switching ──
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabMap = {
+      overlay: 'tab-overlay',
+      quran:   'tab-quran',
+      progress:'tab-progress',
+      apps:    'tab-apps',
+      widget:  'tab-widget',
+    };
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        Object.values(tabMap).forEach(id => {
+          document.getElementById(id)?.classList.remove('active');
+        });
+        const target = tabMap[btn.dataset.tab];
+        if (target) document.getElementById(target)?.classList.add('active');
+      });
+    });
+
+    // ── Scroll reveal ──
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
